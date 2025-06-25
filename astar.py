@@ -122,17 +122,22 @@ class Pathfinder:                                   # class for the pathfinder w
         return path[::-1]                           # reverses the path to get the start -> goal path
     
     def astar_search(self, start, goal):
-        start_time = time.time() 
-
         discovered_nodes = []
         visited_nodes = set()
         g_cost = {}
+
+        max_memory = 0  # max number of nodes held at once
+        start_time = time.time()  # starts tracking time
 
         start_node = Node(start, None, 0, self.calculate_heuristic(start, goal))
         heapq.heappush(discovered_nodes, start_node)
         g_cost[start] = 0
 
         while discovered_nodes:
+            # starts tracking memory
+            current_memory = len(discovered_nodes) + len(visited_nodes)
+            max_memory = max(max_memory, current_memory)
+
             current_node = heapq.heappop(discovered_nodes)
 
             if current_node.cell_position in visited_nodes:
@@ -141,9 +146,12 @@ class Pathfinder:                                   # class for the pathfinder w
             visited_nodes.add(current_node.cell_position)
 
             if self.is_destination(current_node.cell_position[0], current_node.cell_position[1], goal):
-                end_time = time.time()  # End timer
-                elapsed_time = end_time - start_time
-                print(f"Time taken for A* Search: {elapsed_time:.6f} seconds")
+                end_time = time.time()  # end time
+                total_time = end_time - start_time
+
+                print(f"Time taken: {total_time:.4f} seconds")
+                print(f"Peak memory usage: {max_memory} nodes\n")
+
                 return self.trace_path(current_node), current_node.g
 
             for neighbor_pos in self.get_neighbors(current_node.cell_position):
@@ -158,10 +166,12 @@ class Pathfinder:                                   # class for the pathfinder w
                     neighbor_node = Node(neighbor_pos, current_node, tentative_g, h_cost)
                     heapq.heappush(discovered_nodes, neighbor_node)
 
+        # If path not found
         end_time = time.time()
-        print(f"Time taken for A* Search (path not found): {end_time - start_time:.6f} seconds")
+        total_time = end_time - start_time
+        print(f"Time taken: {total_time:.4f} seconds")
+        print(f"Peak memory usage: {max_memory} nodes\n")
         return None
-
         
     def input_eatery(self, input_str):
         input_str = input_str.strip().upper()
