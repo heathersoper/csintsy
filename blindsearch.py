@@ -162,26 +162,43 @@ class BlindSearch:
                     continue
 
                 self.show_landmark_menu()
-                try:
-                    sx = int(input("Enter START row (0-9): "))
-                    sy = int(input("Enter START column (0-19): "))
-                    goal_index = int(input("Choose GOAL eatery index: "))
-                    goal_name, goal = self.get_landmark_by_index(goal_index)
-                    start = (sx, sy)
+                print("Note:")
+                print("  ➤ START can be WALKABLE (.) or EATERY (E)")
+                print("  ➤ GOAL must be an EATERY (E)")
 
-                    if not (self.is_valid(*start) and self.is_valid(*goal)):
-                        print("Invalid start or goal position. Must not be BLOCKED.")
-                        continue
+                while True:
+                    try:
+                        sx = int(input("Enter START row (0-9): "))
+                        sy = int(input("Enter START column (0-19): "))
+                        start = (sx, sy)
 
-                    start_time = time.time()
-                    path, nodes = self.uniform_cost_search(start, goal)
-                    end_time = time.time()
+                        # START must be WALKABLE or EATERY
+                        if not self.is_valid(*start):
+                            print("\nInvalid START: Must be WALKABLE or EATERY (not BLOCKED). Try again.\n")
+                            continue
 
-                    self.print_path_summary(path, start, goal, nodes)
-                    print(f"Time taken: {end_time - start_time:.4f}s")
-                    self.print_grid_with_path(path, start, goal)
-                except (ValueError, IndexError):
-                    print("Invalid input. Please enter correct coordinates and valid eatery index.")
+                        goal_index = int(input("Choose GOAL eatery index: "))
+                        goal_name, goal = self.get_landmark_by_index(goal_index)
+
+                        # GOAL must be EATERY
+                        if not self.is_valid(*goal) or self.grid[goal[0]][goal[1]] != EATERY:
+                            print("\nInvalid GOAL: Must be EATERY. Try again.\n")
+                            continue
+                        break
+
+                    except (ValueError, IndexError):
+                        print("Invalid input. Please enter correct coordinates and valid eatery index.")
+
+                # Run search after valid input
+                start_time = time.perf_counter()
+                path, nodes = self.uniform_cost_search(start, goal)
+                end_time = time.perf_counter()
+
+                self.print_path_summary(path, start, goal, nodes)
+                elapsed_ms = (end_time - start_time) * 1000
+                print(f"Time taken: {elapsed_ms:.6f} ms")
+                self.print_grid_with_path(path, start, goal)
+
 
             elif choice == '2':
                 try:
