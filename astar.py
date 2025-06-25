@@ -371,10 +371,9 @@ def print_menu():
     print("4 - Add new eatery")
     print("5 - Remove eatery")
     print("6 - Back")
-    print("7 - Exit")
     print("-" * 15)
     
-    choice = input("\nEnter a number from 1-7: ").strip()
+    choice = input("\nEnter a number from 1-6: ").strip()
     
     return choice
 
