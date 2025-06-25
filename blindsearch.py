@@ -149,28 +149,28 @@ class BlindSearch:
             choice = input("\nEnter your choice: ").strip()
 
             if choice == '1':
-                if len(bs.landmarks) < 2:
+                if len(self.landmarks) < 2:
                     print("Not enough landmarks to run UCS.")
                     continue
 
-                bs.show_landmark_menu()
+                self.show_landmark_menu()
                 try:
                     start_index = int(input("Choose START location index: "))
                     goal_index = int(input("Choose GOAL location index: "))
-                    start_name, start = bs.get_landmark_by_index(start_index)
-                    goal_name, goal = bs.get_landmark_by_index(goal_index)
+                    start_name, start = self.get_landmark_by_index(start_index)
+                    goal_name, goal = self.get_landmark_by_index(goal_index)
 
-                    if not (bs.is_valid(*start) and bs.is_valid(*goal)):
+                    if not (self.is_valid(*start) and self.is_valid(*goal)):
                         print("Invalid start or goal position. Must not be BLOCKED.")
                         continue
 
                     start_time = time.time()
-                    path, nodes = bs.uniform_cost_search(start, goal)
+                    path, nodes = self.uniform_cost_search(start, goal)
                     end_time = time.time()
 
-                    bs.print_path_summary(path, start, goal, nodes)
+                    self.print_path_summary(path, start, goal, nodes)
                     print(f"Time taken: {end_time - start_time:.4f}s")
-                    bs.print_grid_with_path(path, start, goal)
+                    self.print_grid_with_path(path, start, goal)
                 except (ValueError, IndexError):
                     print("Invalid input. Please choose valid landmark numbers.")
 
@@ -179,21 +179,21 @@ class BlindSearch:
                     name = input("Enter new eatery name: ").strip()
                     x = int(input("Enter row (0-9): "))
                     y = int(input("Enter column (0-19): "))
-                    if not (0 <= x < bs.rows and 0 <= y < bs.cols):
+                    if not (0 <= x < self.rows and 0 <= y < self.cols):
                         print("Invalid position.")
                     else:
-                        bs.grid[x][y] = EATERY
-                        bs.landmarks[name] = (x, y)
+                        self.grid[x][y] = EATERY
+                        self.landmarks[name] = (x, y)
                         print(f"Added '{name}' at position ({x}, {y}) as an eatery.")
                 except ValueError:
                     print("Invalid input.")
 
             elif choice == '3':
-                bs.show_landmark_menu()
+                self.show_landmark_menu()
                 try:
                     index = int(input("Enter index of eatery to remove: "))
-                    name = list(bs.landmarks.keys())[index]
-                    del bs.landmarks[name]
+                    name = list(self.landmarks.keys())[index]
+                    del self.landmarks[name]
                     print(f"Removed '{name}' from landmarks.")
                 except (ValueError, IndexError):
                     print("Invalid selection.")
@@ -202,8 +202,8 @@ class BlindSearch:
                 try:
                     x = int(input("Enter row (0-9): "))
                     y = int(input("Enter column (0-19): "))
-                    if bs.grid[x][y] == BLOCKED:
-                        bs.grid[x][y] = WALKABLE
+                    if self.grid[x][y] == BLOCKED:
+                        self.grid[x][y] = WALKABLE
                         print(f"Tile at ({x}, {y}) is now walkable.")
                     else:
                         print("Tile is already walkable or special.")
