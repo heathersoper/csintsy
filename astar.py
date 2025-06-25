@@ -1,5 +1,6 @@
 import heapq
 import string
+import time
 
 class Node:
     def __init__(self, position, parent, g, h):
@@ -20,13 +21,12 @@ class Node:
         return hash(self.cell_position)
         
 class Eatery:
-    def __init__(self, name: str, row: int, col: int, cuisine: str):
+    def __init__(self, name: str, row: int, col: int):
         self.name = name
         self.row = row
         self.col = col
-        self.cuisine = cuisine
-        
-    def __repr__(self):                             # repr method - string representation of the object
+
+    def __repr__(self):
         return f"{self.name}: {self.row}, {self.col}"
 
 class Pathfinder:                                   # class for the pathfinder which uses the A* search algorithm
@@ -57,37 +57,36 @@ class Pathfinder:                                   # class for the pathfinder w
         
     def initialize_dlsu_eateries(self):
         self.eateries_data = [ 
-            # Name, Row, Col, Cuisine
-            ("University Mall", 7, 19, "Fast Food"),
-            ("McDonald's", 7, 18, "Fast Food"),
-            ("Perico's", 8, 17, "Filipino"),
-            ("Bloemen Hall", 9, 11, "Fast Food, Filipino, Japanese"),
-            ("W.H. Taft Residence", 7, 10, "American"),
-            ("EGI Taft", 7, 9, "Chinese, Korean, Vietnamese"),
-            ("Castro St.", 7, 7, "American, Fast Food"),
-            ("Agno Food Court", 9, 7, "Chinese, Filipino, Italian"),
-            ("One Archers'", 7, 5, "Filipino, Japanese, Korean"),
-            ("La Casita (Br. Andrew Gonzalez Hall)", 7, 4, "Filipino"),
-            ("La Casita (Enrique Razon Sports Center)", 9, 4, "Filipino"),
-            ("Green Mall", 7, 3, "American, Fast Food"),
-            ("Green Court", 9, 5, "Fast Food"),
-            ("Sherwood", 1, 3, "Chinese, Korean, Middle Eastern"),
-            ("Jollibee", 1, 4, "Fast Food"),
-            ("Dagonoy St.", 1, 10, "Filipino"),
-            ("Burgundy", 1, 13, "American"),
-            ("Estrada St.", 1, 14, "Filipino, Mexican"),
-            ("D'Student's Place", 1, 17, "American, Korean"),
-            ("Leon Guinto St.", 0, 13, "Filipino, Korean"),
-            ("P. Ocampo St.", 1, 19, "Filipino, Japanese"),
-            ("Fidel A. Reyes St.", 8, 1, "Filipino")
+            # Name, Row, Col
+            ("University Mall", 7, 19),
+            ("McDonald's", 7, 18),
+            ("Perico's", 8, 17),
+            ("Bloemen Hall", 9, 11),
+            ("W.H. Taft Residence", 7, 10),
+            ("EGI Taft", 7, 9),
+            ("Castro St.", 7, 7),
+            ("Agno Food Court", 9, 7),
+            ("One Archers'", 7, 5),
+            ("La Casita (Br. Andrew Gonzalez Hall)", 7, 4),
+            ("La Casita (Enrique Razon Sports Center)", 9, 4),
+            ("Green Mall", 7, 3),
+            ("Green Court", 9, 5),
+            ("Sherwood", 1, 3),
+            ("Jollibee", 1, 4),
+            ("Dagonoy St.", 1, 10),
+            ("Burgundy", 1, 13),
+            ("Estrada St.", 1, 14),
+            ("D'Student's Place", 1, 17),
+            ("Leon Guinto St.", 0, 13),
+            ("P. Ocampo St.", 1, 19),
+            ("Fidel A. Reyes St.", 8, 1)
         ]
-        
+
         letters = string.ascii_uppercase
-        for i, (name, row, col, cuisine) in enumerate(self.eateries_data):
-            eatery = Eatery(name, row, col, cuisine)
+        for i, (name, row, col) in enumerate(self.eateries_data):
+            eatery = Eatery(name, row, col)
             letter_key = letters[i] if i < len(letters) else f"{letters[i//26-1]}{letters[i%26]}"
             self.eateries[letter_key] = eatery
-            # self.grid[row][col] = 2      
     
     def is_valid(self, row, col):                   # checks if the coordinates are within the grid
         return (row >= 0) and (row < self.no_of_rows) and (col >= 0) and (col < self.no_of_cols)
@@ -123,38 +122,46 @@ class Pathfinder:                                   # class for the pathfinder w
         return path[::-1]                           # reverses the path to get the start -> goal path
     
     def astar_search(self, start, goal):
+        start_time = time.time() 
+
         discovered_nodes = []
         visited_nodes = set()
-        g_cost = {}  
-        
+        g_cost = {}
+
         start_node = Node(start, None, 0, self.calculate_heuristic(start, goal))
         heapq.heappush(discovered_nodes, start_node)
-        g_cost[start] = 0                                                       # cumulative cost (actual cost)  
-        
+        g_cost[start] = 0
+
         while discovered_nodes:
-            current_node = heapq.heappop(discovered_nodes)                     
-            
+            current_node = heapq.heappop(discovered_nodes)
+
             if current_node.cell_position in visited_nodes:
                 continue
-            
+
             visited_nodes.add(current_node.cell_position)
-            
+
             if self.is_destination(current_node.cell_position[0], current_node.cell_position[1], goal):
-                return self.trace_path(current_node), current_node.g            # returns both the path and the total cost (current value of g_cost)
-            
+                end_time = time.time()  # End timer
+                elapsed_time = end_time - start_time
+                print(f"Time taken for A* Search: {elapsed_time:.6f} seconds")
+                return self.trace_path(current_node), current_node.g
+
             for neighbor_pos in self.get_neighbors(current_node.cell_position):
                 if neighbor_pos in visited_nodes:
                     continue
-                
+
                 tentative_g = current_node.g + 1
-                
+
                 if neighbor_pos not in g_cost or tentative_g < g_cost[neighbor_pos]:
                     g_cost[neighbor_pos] = tentative_g
                     h_cost = self.calculate_heuristic(neighbor_pos, goal)
                     neighbor_node = Node(neighbor_pos, current_node, tentative_g, h_cost)
                     heapq.heappush(discovered_nodes, neighbor_node)
-        
+
+        end_time = time.time()
+        print(f"Time taken for A* Search (path not found): {end_time - start_time:.6f} seconds")
         return None
+
         
     def input_eatery(self, input_str):
         input_str = input_str.strip().upper()
@@ -263,7 +270,6 @@ class Pathfinder:                                   # class for the pathfinder w
         print("-" * 30)
 
         name = input("Enter eatery name: ").strip()
-        cuisine = input("Enter cuisine type(s): ").strip()
 
         try:
             row = int(input("Enter row (0–9): "))
@@ -275,15 +281,13 @@ class Pathfinder:                                   # class for the pathfinder w
         if not self.is_valid(row, col):
             print("Error: Coordinates out of grid bounds.")
             return
-        
+
         if self.grid[row][col] == 1:
             print("Error: Cannot place eatery on a blocked cell (1).")
             return
 
-        # Mark cell as eatery
         self.grid[row][col] = 2
 
-        # Automatically appoint a letter to the new eatery
         existing_keys = set(self.eateries.keys())
         next_letter = None
 
@@ -292,7 +296,6 @@ class Pathfinder:                                   # class for the pathfinder w
                 next_letter = letter
                 break
 
-        # If all single letters are taken, try AA–ZZ
         if next_letter is None:
             for first in string.ascii_uppercase:
                 for second in string.ascii_uppercase:
@@ -306,12 +309,13 @@ class Pathfinder:                                   # class for the pathfinder w
         if next_letter is None:
             print("Error: All letter keys from A to ZZ are used up.")
             return
-        
-        new_eatery = Eatery(name, row, col, cuisine)
+
+        new_eatery = Eatery(name, row, col)
         self.eateries[next_letter] = new_eatery
-        self.eateries_data.append((name, row, col, cuisine))
+        self.eateries_data.append((name, row, col))
 
         print(f"Successfully added {name} at ({row}, {col}) as {next_letter}.")
+
 
     def remove_eatery(self):
         print("\nRemove Eatery")
