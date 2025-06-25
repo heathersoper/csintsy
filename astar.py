@@ -402,4 +402,4 @@ def run_astar():
             print("Returning to main menu...")
             break
         else:
-            print("Invalid choice! Please enter a number from 1-7.")
+            print("Invalid choice! Please enter a number from 1-6.")
