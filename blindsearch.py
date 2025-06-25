@@ -57,12 +57,14 @@ class BlindSearch:
             "Fidel A. Reyes Street": (8, 1),
         }
 
+    # return true if position is within bounds and not blocked
     def is_valid(self, x: int, y: int) -> bool:
         return 0 <= x < self.rows and 0 <= y < self.cols and self.grid[x][y] != BLOCKED
 
+    # UCS using a min-heap to prioritize lowest-cost paths
     def uniform_cost_search(self, start: Position, goal: Position) -> Tuple[List[Position], int]:
         visited = set()
-        queue = [(0, start, [start])]
+        queue = [(0, start, [start])]    # (cost, current_position, path)
         heapq.heapify(queue)
         nodes_expanded = 0
 
@@ -77,12 +79,12 @@ class BlindSearch:
                 return path, nodes_expanded
 
             x, y = current
-            for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+            for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:     # up, down, left, right
                 nx, ny = x + dx, y + dy
                 if self.is_valid(nx, ny) and (nx, ny) not in visited:
                     heapq.heappush(queue, (cost + 1, (nx, ny), path + [(nx, ny)]))
 
-        return [], nodes_expanded
+        return [], nodes_expanded     # no path found
 
     def print_grid_with_path(self, path: List[Position], start: Position, goal: Position):
         print("\nGrid View:")
