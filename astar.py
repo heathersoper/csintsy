@@ -127,7 +127,7 @@ class Pathfinder:                                   # class for the pathfinder w
         g_cost = {}
 
         max_memory = 0  # max number of nodes held at once
-        start_time = time.time()  # starts tracking time
+        start_time = time.perf_counter()  # starts tracking time
 
         start_node = Node(start, None, 0, self.calculate_heuristic(start, goal))
         heapq.heappush(discovered_nodes, start_node)
@@ -146,10 +146,11 @@ class Pathfinder:                                   # class for the pathfinder w
             visited_nodes.add(current_node.cell_position)
 
             if self.is_destination(current_node.cell_position[0], current_node.cell_position[1], goal):
-                end_time = time.time()  # end time
-                total_time = end_time - start_time
+                end_time = time.perf_counter()
+                
+                total_time_ms = (end_time - start_time) * 1000
+                print(f"Time taken: {total_time_ms:.6f} ms")
 
-                print(f"Time taken: {total_time:.4f} seconds")
                 print(f"Peak memory usage: {max_memory} nodes\n")
 
                 return self.trace_path(current_node), current_node.g
