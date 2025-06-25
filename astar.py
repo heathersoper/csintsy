@@ -378,7 +378,8 @@ def print_menu():
     
     return choice
 
-if __name__ == "__main__":
+#if __name__ == "__main__":
+def run_astar():
     print("-" * 50)
     print("DLSU EATERY PATHFINDER (A* SEARCH ALGORITHM)")
     print("-" * 50)
@@ -400,8 +401,6 @@ if __name__ == "__main__":
             pathfinder.remove_eatery()
         elif user_choice == "6":
             print("Returning to main menu...")
-        elif user_choice == "7":
-            print("Closing the program. Thank you for using DLSU Eatery Pathfinder!")
             break
         else:
             print("Invalid choice! Please enter a number from 1-7.")
