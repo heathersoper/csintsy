@@ -17,7 +17,7 @@ class BlindSearch:
         self.cols = len(self.grid[0])
         self.landmarks = self.define_landmarks()
 
-    def initialize_grid(self) -> Grid:              # 0 - walkable, 1 - blocked, 2 - eatery
+    def initialize_grid(self) -> Grid:
         return [
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 2, 2, 1, 1, 1, 1, 1, 2, 0, 1, 2, 2, 0, 1, 2, 1, 2],
@@ -57,14 +57,12 @@ class BlindSearch:
             "Fidel A. Reyes Street": (8, 1),
         }
 
-    # return true if position is within bounds and not blocked
     def is_valid(self, x: int, y: int) -> bool:
         return 0 <= x < self.rows and 0 <= y < self.cols and self.grid[x][y] != BLOCKED
 
-    # UCS using a min-heap to prioritize lowest-cost paths
     def uniform_cost_search(self, start: Position, goal: Position) -> Tuple[List[Position], int]:
         visited = set()
-        queue = [(0, start, [start])]    # (cost, current_position, path)
+        queue = [(0, start, [start])]
         heapq.heapify(queue)
         nodes_expanded = 0
 
@@ -79,12 +77,12 @@ class BlindSearch:
                 return path, nodes_expanded
 
             x, y = current
-            for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:     # up, down, left, right
+            for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
                 nx, ny = x + dx, y + dy
                 if self.is_valid(nx, ny) and (nx, ny) not in visited:
                     heapq.heappush(queue, (cost + 1, (nx, ny), path + [(nx, ny)]))
 
-        return [], nodes_expanded     # no path found
+        return [], nodes_expanded
 
     def print_grid_with_path(self, path: List[Position], start: Position, goal: Position):
         print("\nGrid View:")
@@ -151,16 +149,17 @@ class BlindSearch:
             choice = input("\nEnter your choice: ").strip()
 
             if choice == '1':
-                if len(self.landmarks) < 2:
-                    print("Not enough landmarks to run UCS.")
+                if len(self.landmarks) < 1:
+                    print("No landmarks available.")
                     continue
 
                 self.show_landmark_menu()
                 try:
-                    start_index = int(input("Choose START location index: "))
-                    goal_index = int(input("Choose GOAL location index: "))
-                    start_name, start = self.get_landmark_by_index(start_index)
+                    sx = int(input("Enter START row (0-9): "))
+                    sy = int(input("Enter START column (0-19): "))
+                    goal_index = int(input("Choose GOAL eatery index: "))
                     goal_name, goal = self.get_landmark_by_index(goal_index)
+                    start = (sx, sy)
 
                     if not (self.is_valid(*start) and self.is_valid(*goal)):
                         print("Invalid start or goal position. Must not be BLOCKED.")
@@ -174,7 +173,7 @@ class BlindSearch:
                     print(f"Time taken: {end_time - start_time:.4f}s")
                     self.print_grid_with_path(path, start, goal)
                 except (ValueError, IndexError):
-                    print("Invalid input. Please choose valid landmark numbers.")
+                    print("Invalid input. Please enter correct coordinates and valid eatery index.")
 
             elif choice == '2':
                 try:
