@@ -18,7 +18,7 @@ class BlindSearch:
         self.landmarks = self.define_landmarks()
 
     def initialize_grid(self) -> Grid:
-        return [
+        return [                 # 0 - walkable, 1 - blocked, 2 - eatery
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 2, 2, 1, 1, 1, 1, 1, 2, 0, 1, 2, 2, 0, 1, 2, 1, 2],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -64,25 +64,32 @@ class BlindSearch:
         visited = set()
         queue = [(0, start, [start])]
         heapq.heapify(queue)
-        nodes_expanded = 0
+        nodes_expanded = 0  # keeps track of nodes processed
+        max_queue_size = 1 # keeps track of the maximum size of the priority queue
 
         while queue:
-            cost, current, path = heapq.heappop(queue)
-            if current in visited:
+            max_queue_size = max(max_queue_size, len(queue)) # tracks the maximum size the queue has reached
+            cost, current, path = heapq.heappop(queue) # pops the node with the lowest path cost
+            if current in visited: # skip node if visited already
                 continue
-            visited.add(current)
+            visited.add(current) # marks current node as visited
             nodes_expanded += 1
 
             if current == goal:
+                self.memory_used = max_queue_size + len(visited) 
                 return path, nodes_expanded
 
             x, y = current
             for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
-                nx, ny = x + dx, y + dy
+                nx, ny = x + dx, y + dy # coordinates of neighboring tiles
                 if self.is_valid(nx, ny) and (nx, ny) not in visited:
-                    heapq.heappush(queue, (cost + 1, (nx, ny), path + [(nx, ny)]))
+                    heapq.heappush(queue, (cost + 1, (nx, ny), path + [(nx, ny)]))  # adds the valid neighbor into the priority queue
 
+        self.memory_used = max_queue_size + len(visited) 
         return [], nodes_expanded
+
+    def compute_memory_complexity(self):
+        return self.memory_used
 
     def print_grid_with_path(self, path: List[Position], start: Position, goal: Position):
         print("\nGrid View:")
@@ -123,7 +130,8 @@ class BlindSearch:
         print("\nPATH FOUND!")
         print("Nodes Visited: " + " ➜ ".join(readable_path))
         print(f"Total Cost: {len(path) - 1}")
-        print(f"Nodes Expanded: {nodes_expanded}")
+        print(f"Nodes Expanded: {nodes_expanded}") # nodes removed from queue & processed
+        print(f"Memory Used (approx): {self.compute_memory_complexity()} nodes") # peak memory usage: visited + frontier (max)
 
     def show_landmark_menu(self):
         print("\nDLSU FOOD MAP:")
